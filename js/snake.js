@@ -79,3 +79,89 @@ Component.Snake = function(canvas, conf) {
         this.initFood();
     };
 };
+
+// Rajzolás.
+Game.Draw = function(context, snake) {
+    this.drawStage = function() {
+        var keyPress = snake.stage.keyEvent.getKey();
+        if (typeof keyPress != 'undefined') {
+            snake.stage.direction = keyPress;
+        }
+
+        // A játék hátterét fehérre satírozzuk.
+        context.fillStyle = "white";
+        context.fillRect(0, 0, snake.stage.width, snake.stage.height);
+
+        // A kígyó pozíciója.
+        var nx = snake.stage.length[0].x;
+        var ny = snake.stage.length[0].y;
+
+        // A pozíció változtatása a haladási irány alapján.
+        switch(snake.stage.direction) {
+            case 'right': nx++;
+                break;
+            case 'left': nx--;
+                break;
+            case 'up': ny--;
+                break;
+            case 'down': ny++;
+                break;
+        }
+
+        // Ütközés figyelése.
+        if (this.collision(nx, ny)) {
+            snake.restart();
+            return;
+        }
+
+        // A kígyó etetése.
+        if (nx == snake.stage.food.x && ny == snake.stage.food.y) {
+            var tail = {x: nx, y: ny};
+            snake.stage.score++;
+            snake.initFood();
+        } else {
+            var tail = snake.stage.length.pop();
+            tail.x = nx;
+            tail.y = ny;
+        }
+        snake.stage.length.unshift(tail);
+
+        // Kígyó kirajzolása.
+        for (var i = 0; i < snake.stage.length.length; i++) {
+            var cell = snake.stage.length[i];
+            this.drawCell(cell.x, cell.y);
+        }
+
+        // Eledel rajzolása.
+        this.drawCell(snake.stage.food.x, snake.stage.food.y);
+
+        // Pontszám megjelenítése.
+        context.fillText('Score: ' + snake.stage.score, 5, (snake.stage.height-5));
+    };
+
+    // Cella rajzolása.
+    this.drawCell = function(x, y) {
+        context.fillStyle = 'rgb(170, 170, 170)';
+        context.beginPath();
+        context.arc(
+            (x * snake.stage.conf.cw + 6),
+            (y * snake.stage.conf.cw + 6),
+            4,
+            0,
+            2 * Math.PI,
+            false
+        );
+        context.fill();
+    };
+
+    // Ütközés megállapítása.
+    this.collision = function(nx, ny) {
+        if (nx == -1 || nx == (snake.stage.width / snake.stage.conf.cw) || 
+            ny == -1 || ny == (snake.stage.height / snake.stage.conf.cw) )
+        {
+            return true;
+        } else {
+            return false;
+        }
+    };
+};
