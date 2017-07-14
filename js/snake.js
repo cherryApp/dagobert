@@ -28,3 +28,54 @@ Keyboard.ControllerEvents = function() {
         return this.keymap[this.pressKey];
     }
 };
+
+// Játéktér.
+Component.Stage = function(canvas, conf) {
+    // Settings.
+    this.keyEvent = new Keyboard.ControllerEvents();
+    this.width = canvas.width;
+    this.height = canvas.height;
+    this.length = [];
+    this.food = {};
+    this.score = 0;
+    this.direction = 'right';
+    this.conf = {
+        cw: 10,
+        size: 5,
+        fps: 100
+    };
+};
+
+// Kígyó.
+Component.Snake = function(canvas, conf) {
+    // A kígyó mozgástere.
+    this.stage = new Component.Stage(canvas, conf);
+
+    // Kígyó inicializálása.
+    this.initSnake = function() {
+        for (var i = 0; i < this.stage.conf.size; i++) {
+            this.stage.length.push({ x: i, y: 0 });
+        }
+    };
+    this.initSnake();
+
+    // Étel inicializálása.
+    this.initFood = function() {
+        this.stage.food = {
+            x: 30,
+            y: 50
+        }
+    }
+    this.initFood();
+
+    // Játék újraindítása.
+    this.restart = function() {
+        this.stage.length = [];
+        this.stage.food = {};
+        this.stage.score = 0;
+        this.stage.direction = 'right';
+        this.stage.keyEvent.pressKey = null;
+        this.initSnake();
+        this.initFood();
+    };
+};
