@@ -42,7 +42,7 @@ Component.Stage = function(canvas, conf) {
     this.conf = {
         cw: 10,
         size: 5,
-        fps: 100
+        fps: 200
     };
 };
 
@@ -62,8 +62,16 @@ Component.Snake = function(canvas, conf) {
     // Étel inicializálása.
     this.initFood = function() {
         this.stage.food = {
-            x: 30,
-            y: 50
+            x: Math.round(
+                Math.random()*(
+                    (this.stage.width - this.stage.conf.cw) / this.stage.conf.cw
+                )
+            ),
+            y: Math.round(
+                Math.random()*(
+                    (this.stage.height - this.stage.conf.cw) / this.stage.conf.cw
+                )
+            )
         }
     }
     this.initFood();
@@ -118,6 +126,7 @@ Game.Draw = function(context, snake) {
         if (nx == snake.stage.food.x && ny == snake.stage.food.y) {
             var tail = {x: nx, y: ny};
             snake.stage.score++;
+            snake.stage.conf.fps -= 40;
             snake.initFood();
         } else {
             var tail = snake.stage.length.pop();
@@ -165,3 +174,24 @@ Game.Draw = function(context, snake) {
         }
     };
 };
+
+// Játék indítása.
+Game.Snake = function(elementId, conf) {
+    // Beállítások.
+    var canvas = document.getElementById(elementId);
+    var context = canvas.getContext("2d");
+    var snake = new Component.Snake(canvas, conf);
+    var gameDraw = new Game.Draw(context, snake);
+    var intval = 0;
+
+    // Game interval.
+    this.setSpeed = function(speed) {
+        speed = speed || snake.stage.conf.fps;
+        var intval = setInterval(function() {
+            gameDraw.drawStage();
+        }, speed);
+    }
+    this.setSpeed();
+};
+
+var snake = new Game.Snake('stage', {fps: 100, size: 4});
